@@ -1,0 +1,35 @@
+# Unity项目.gitignore文件
+
+# 必须忽略的文件夹
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Ll]ogs/
+
+# Unity自动生成的文件
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+
+# Unity资产元数据（但保留Assets/和ProjectSettings/下的必要文件）
+/*.pidb.meta
+/*.unitypackage.meta
+
+# 构建结果
+[Bb]uilds/
+/[Bb]uild/
+
+# 其他自动生成的文件
+.vs/
+.gradle/
+[Dd]ocs/
+
+# MacOS
+.DS_Store
