@@ -20,12 +20,12 @@ public static class BuildingFunctions
 
     private static IEnumerable<HexGridElement<AreaInfo>> SurroundingArea(int range)
     {
-        Vector2Int buildingPosition = GlobalManager.Inst.BuildingPosition;
+        Vector2Int buildingPosition = GlobalManager.Inst.TargetPosition;
         return GlobalManager.Inst.HexGrid.Area(buildingPosition, range);
     }
 
     private static void SelfAddScore(int score)
     {
-        GlobalManager.BuildingAreaInfo.AddScore(score);
+        GlobalManager.TargetAreaInfo.AddScore(score);
     }
 }

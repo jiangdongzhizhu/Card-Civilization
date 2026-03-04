@@ -54,10 +54,20 @@ public class Area : MonoBehaviour
         scoreText.text = "Score " + areaInfo.Score.ToString();
     }
 
+    public void PlayCard()
+    {
+        GlobalManager.Inst.TargetPosition = hexGridElement.coordinates;
+    }
+
     public void BuildBuilding(string buildingID)
     {
+        if (buildingID == null || !Building.dict.ContainsKey(buildingID))
+        {
+            Debug.Log("No Corresponding Building!");
+            return;
+        }
+
         AreaInfo areaInfo = hexGridElement.value;
-        GlobalManager.Inst.BuildingPosition = hexGridElement.coordinates;
         areaInfo.BuildBuilding(buildingID);
     }
 }

@@ -7,8 +7,8 @@ public class GlobalManager : MonoBehaviour
 
     public static GlobalManager Inst { get; private set; }
     public HexGrid<AreaInfo> HexGrid => hexGrid;
-    public Vector2Int BuildingPosition { get; set; }
-    public static AreaInfo BuildingAreaInfo => Inst.HexGrid[Inst.BuildingPosition].value;
+    public Vector2Int TargetPosition { get; set; }
+    public static AreaInfo TargetAreaInfo => Inst.HexGrid[Inst.TargetPosition].value;
 
     private void Awake()
     {
