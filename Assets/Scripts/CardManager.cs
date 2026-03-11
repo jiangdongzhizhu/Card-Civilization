@@ -36,6 +36,14 @@ public class CardManager : MonoBehaviour
         drawPile.AddRange(new CardInfo[] {
             new CardInfo("farm"),
             new CardInfo("farm"),
+            new CardInfo("farm"),
+            new CardInfo("mine"),
+            new CardInfo("mine"),
+            new CardInfo("mine"),
+            new CardInfo("seaport"),
+            new CardInfo("seaport"),
+            new CardInfo("market"),
+            new CardInfo("library")
         });
     }
 

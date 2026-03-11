@@ -14,6 +14,8 @@ public class AreaDropZone : MonoBehaviour, IDropHandler
 
     public void OnDrop(PointerEventData eventData)
     {
+        if (area.AreaInfo.BuildingID != null) return;
+
         area.PlayCard();
         HandCard card = eventData.pointerDrag.GetComponent<HandCard>();
         card.Play();

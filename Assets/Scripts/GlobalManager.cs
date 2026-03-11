@@ -27,4 +27,14 @@ public class GlobalManager : MonoBehaviour
             areaInfo.TerrainType = (TerrainType)roll;
         }
     }
+
+    public float GetTotalScore()
+    {
+        int totalScore = 0;
+        foreach (AreaInfo areaInfo in HexGrid.GetAllElements())
+        {
+            totalScore += areaInfo.Score;
+        }
+        return totalScore;
+    }
 }

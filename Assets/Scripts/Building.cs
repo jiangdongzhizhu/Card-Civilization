@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class Building
 {
@@ -13,13 +11,49 @@ public class Building
     {
         new Building()
         {
-            ID="farm",
+            ID = "farm",
             OnBuilt = () =>
             {
-                BuildingFunctions.TerrainTypeBonus(TerrainType.Plain,1);
-                BuildingFunctions.TerrainTypeBonus(TerrainType.Forest,1);
+                BuildingFunctions.TerrainTypeBonus(TerrainType.Plain, 1);
+                BuildingFunctions.TerrainTypeBonus(TerrainType.Forest, 1);
             }
-        }
+        },
+        new Building()
+        {
+            ID = "mine",
+            OnBuilt = () =>
+            {
+                BuildingFunctions.TerrainTypeBonus(TerrainType.Desert, 1);
+                BuildingFunctions.TerrainTypeBonus(TerrainType.Mountain, 1);
+            }
+        },
+        new Building()
+        {
+            ID = "seaport",
+            OnBuilt = () =>
+            {
+                BuildingFunctions.TerrainTypeBonus(TerrainType.Waters, 2);
+            }
+        },
+        new Building()
+        {
+            ID = "market",
+            OnBuilt = () =>
+            {
+                BuildingFunctions.ScoreBonus(4, 3);
+            }
+        },
+        new Building()
+        {
+            ID = "library",
+            OnBuilt = () =>
+            {
+                BuildingFunctions.Support(2, areaInfo =>
+                {
+                    areaInfo.AddScore(areaInfo.Score);
+                });
+            }
+        },
     };
 
     public static IReadOnlyDictionary<string, Building> dict

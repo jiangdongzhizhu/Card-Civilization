@@ -8,6 +8,8 @@ public struct HexGridElement<T>
 
     public static implicit operator Vector2Int(HexGridElement<T> element)
         => element.coordinates;
+
+    public static implicit operator T(HexGridElement<T> element) => element.value;
 }
 
 public class HexGrid<T> where T : new()
@@ -93,9 +95,9 @@ public class HexGrid<T> where T : new()
         }
     }
 
-    public IEnumerable<HexGridElement<T>> Area(Vector2Int center, int radius)
+    public IEnumerable<HexGridElement<T>> Area(Vector2Int center, int radius, bool includingCenter = true)
     {
-        yield return this[center];
+        if (includingCenter) yield return this[center];
         for (int i = 1; i <= radius; i++)
         {
             foreach (var item in SingleRing(center, i))

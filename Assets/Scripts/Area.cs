@@ -58,16 +58,4 @@ public class Area : MonoBehaviour
     {
         GlobalManager.Inst.TargetPosition = hexGridElement.coordinates;
     }
-
-    public void BuildBuilding(string buildingID)
-    {
-        if (buildingID == null || !Building.dict.ContainsKey(buildingID))
-        {
-            Debug.Log("No Corresponding Building!");
-            return;
-        }
-
-        AreaInfo areaInfo = hexGridElement.value;
-        areaInfo.BuildBuilding(buildingID);
-    }
 }

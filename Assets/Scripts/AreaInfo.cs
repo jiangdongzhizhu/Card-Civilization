@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public enum TerrainType
 {
@@ -13,7 +14,7 @@ public enum TerrainType
 public class AreaInfo
 {
     private TerrainType terrainType;
-    private int additionalScore;
+    private List<AreaBuff> buffs = new List<AreaBuff>();
 
     public TerrainType TerrainType
     {
@@ -32,7 +33,26 @@ public class AreaInfo
 
     public void AddScore(int score)
     {
-        additionalScore += score;
+        Score += score;
+    }
+
+    public void AddBuff(AreaBuff areaBuff)
+    {
+        buffs.Add(areaBuff);
+    }
+
+    public void ClearBuffs()
+    {
+        int i = 0;
+        while (i < buffs.Count)
+        {
+            if (buffs[i].IsRemoved)
+            {
+                buffs.RemoveAt(i);
+                continue;
+            }
+            i++;
+        }
     }
 
     public void BuildBuilding(string buildingID)
@@ -40,8 +60,12 @@ public class AreaInfo
         BuildingID = buildingID;
         Building.dict[buildingID].OnBuilt?.Invoke();
 
-        Score += additionalScore;
-        additionalScore = 0;
+        foreach (AreaBuff buff in buffs)
+        {
+            buff.OnBuildingChanged?.Invoke(buff);
+        }
+        ClearBuffs();
+
         AfterBuildingChanged?.Invoke();
     }
 }
