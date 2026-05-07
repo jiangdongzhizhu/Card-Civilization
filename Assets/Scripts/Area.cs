@@ -1,61 +1,69 @@
-using UnityEngine;
-using UnityEngine.UI;
+using System;
 
-public class Area : MonoBehaviour
+namespace CardCivilization
 {
-    [SerializeField] private Image hexImage;
-    [SerializeField] private Text buildingIDText;
-    [SerializeField] private Text scoreText;
-    private HexGridElement<AreaInfo> hexGridElement;
-
-    public AreaInfo AreaInfo => hexGridElement.value;
-
-    public void Initialize(HexGridElement<AreaInfo> hexGridElement)
+    public class Area
     {
-        this.hexGridElement = hexGridElement;
-        UpdateTerrainType();
-        buildingIDText.text = "";
-        scoreText.text = "";
-        AreaInfo areaInfo = hexGridElement.value;
-        areaInfo.AfterTerrainTypeChanged += UpdateTerrainType;
-        areaInfo.AfterBuildingChanged += UpdateBuildingInfo;
-    }
+        private Building building;
 
-    public void UpdateTerrainType()
-    {
-        Color color = Color.white;
-        AreaInfo areaInfo = hexGridElement.value;
-        switch (areaInfo.TerrainType)
+        public HexGridElement<Area> HexGridElement { get; private set; }
+        public int ValuePoint { get; set; }
+        public int TempValuePoint { get; private set; }
+        public int TotalValuePoint => ValuePoint + TempValuePoint;
+        public int ValidValuePoint => HasBuilding ? TotalValuePoint : 0;
+        public bool HasBuilding => building != null;
+        public string BuildingID => building != null ? building.ID : "";
+
+        public event Action OnBuildingBuiltEvent;
+        public event Action OnValuePointIncreaseEvent;
+
+        public void Initialize(HexGridElement<Area> element)
         {
-            case TerrainType.Plain:
-                color = new Color(0.8f, 0.63f, 0.28f);
-                break;
-            case TerrainType.Forest:
-                color = Color.green;
-                break;
-            case TerrainType.Mountain:
-                color = new Color(0.85f, 0.22f, 0.18f);
-                break;
-            case TerrainType.Desert:
-                color = Color.yellow;
-                break;
-            case TerrainType.Waters:
-                color = new Color(0.16f, 0.3f, 0.8f);
-                break;
+            HexGridElement = element;
+            CardManager.Inst.OnTurnEnd += ClearTempValuePoint;
+
+            int roll = UnityEngine.Random.Range(0, 5);
+            ValuePoint = roll;
         }
-        hexImage.color = color;
-    }
 
-    public void UpdateBuildingInfo()
-    {
-        AreaInfo areaInfo = hexGridElement.value;
-        string buildingID = areaInfo.BuildingID != null ? areaInfo.BuildingID : "";
-        buildingIDText.text = buildingID;
-        scoreText.text = "Score " + areaInfo.Score.ToString();
-    }
+        private void ClearTempValuePoint()
+        {
+            TempValuePoint = 0;
+        }
 
-    public void PlayCard()
-    {
-        GlobalManager.Inst.TargetPosition = hexGridElement.coordinates;
+        public void AddValuePointDirectly(int point, bool isTemp = false)
+        {
+            if (isTemp)
+            {
+                TempValuePoint += point;
+            }
+            else
+            {
+                ValuePoint += point;
+            }
+        }
+
+        public void AddValuePoint(int point, bool isTemp = false)
+        {
+            AddValuePointDirectly(point, isTemp);
+            AreaManager.Inst.History.lastBuffedArea = this;
+            OnValuePointIncreaseEvent?.Invoke();
+        }
+
+        public void BuildBuilding(Building building)
+        {
+            this.building = building;
+            building.OnBuilt(HexGridElement);
+
+            OnBuildingBuiltEvent?.Invoke();
+        }
+
+        public void RemoveBuilding()
+        {
+            building.OnRemove();
+            building = null;
+
+            ValuePoint = 0;
+        }
     }
 }

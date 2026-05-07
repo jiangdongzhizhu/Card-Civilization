@@ -4,98 +4,123 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class CardInfo
+namespace CardCivilization
 {
-    public string cardName;
-
-    public CardInfo(string cardName)
+    public class CardManager : MonoBehaviour
     {
-        this.cardName = cardName;
-    }
-}
+        public static CardManager Inst { get; private set; }
 
-public class CardManager : MonoBehaviour
-{
-    public static CardManager Inst { get; private set; }
+        private List<Skill> drawPile = new List<Skill>();
+        private List<Skill> hand = new List<Skill>();
+        private List<Skill> discardPile = new List<Skill>();
 
-    private List<CardInfo> drawPile = new List<CardInfo>();
-    private List<CardInfo> hand = new List<CardInfo>();
-    private List<CardInfo> discardPile = new List<CardInfo>();
+        public IReadOnlyList<Skill> DrawPile => drawPile;
+        public IReadOnlyList<Skill> Hand => hand;
+        public IReadOnlyList<Skill> DiscardPile => discardPile;
+        public int EnergyRestore { get; set; } = 3;
+        public int Energy { get; private set; }
 
-    public IReadOnlyList<CardInfo> DrawPile => drawPile;
-    public IReadOnlyList<CardInfo> Hand => hand;
-    public IReadOnlyList<CardInfo> DiscardPile => discardPile;
+        public event Action OnTurnEnd;
+        public event Action AfterInfoUpdated;
 
-    public event Action AfterTurnEnd;
-    public event Action AfterPlayCard;
-
-    private void Awake()
-    {
-        Inst = this;
-
-        drawPile.AddRange(new CardInfo[] {
-            new CardInfo("farm"),
-            new CardInfo("farm"),
-            new CardInfo("farm"),
-            new CardInfo("mine"),
-            new CardInfo("mine"),
-            new CardInfo("mine"),
-            new CardInfo("seaport"),
-            new CardInfo("seaport"),
-            new CardInfo("market"),
-            new CardInfo("library")
-        });
-    }
-
-    private void Start()
-    {
-        StartCoroutine(Enumerator());
-
-        IEnumerator Enumerator()
+        private void Awake()
         {
-            yield return new WaitForFixedUpdate();
-            EndTurn();
-        }
-    }
+            Inst = this;
 
-    public void PlayCard(CardInfo cardInfo)
-    {
-        GlobalManager.TargetAreaInfo.BuildBuilding(cardInfo.cardName);
-        hand.Remove(cardInfo);
-        discardPile.Add(cardInfo);
-        AfterPlayCard?.Invoke();
-    }
-
-    public void EndTurn()
-    {
-        discardPile.AddRange(hand);
-        hand.Clear();
-        DrawCards();
-
-        AfterTurnEnd?.Invoke();
-    }
-
-    private void DrawCards()
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            DrawCardOnce();
-        }
-    }
-
-    private void DrawCardOnce()
-    {
-        if (drawPile.Count == 0)
-        {
-            drawPile.AddRange(discardPile);
-            discardPile.Clear();
+            drawPile.AddRange(new Skill[] {
+                new GrowerCard(),
+                new GiftGiverCard(),
+                new EquivalentLoverCard(),
+                new BigNumLoverCard(),
+                new RequestSupportCard(),
+                new RetrieveCard()
+            });
         }
 
-        if (drawPile.Count == 0) return;
+        private void Start()
+        {
+            StartCoroutine(Enumerator());
 
-        int roll = Random.Range(0, drawPile.Count);
-        CardInfo cardToDraw = drawPile[roll];
-        hand.Add(cardToDraw);
-        drawPile.RemoveAt(roll);
+            IEnumerator Enumerator()
+            {
+                yield return new WaitForFixedUpdate();
+                EndTurn();
+            }
+        }
+
+        public bool CanSelectCard(Skill skill)
+        {
+            return skill.Cost <= Energy;
+        }
+
+        public void PlayCard(Skill skill)
+        {
+            Energy -= skill.Cost;
+            hand.Remove(skill);
+            if (!skill.IsExhausted)
+            {
+                discardPile.Add(skill);
+            }
+
+            AfterInfoUpdated?.Invoke();
+        }
+
+        public void AddCardToHand<T>(int num = 1) where T : Skill, new()
+        {
+            for (int i = 0; i < num; i++)
+            {
+                hand.Add(new T());
+            }
+
+            AfterInfoUpdated?.Invoke();
+        }
+
+        public void DrawCards(int num = 1)
+        {
+            for (int i = 0; i < num; i++)
+            {
+                DrawCardOnce();
+            }
+
+            AfterInfoUpdated?.Invoke();
+        }
+
+        public void EndTurn()
+        {
+            if (Energy < EnergyRestore)
+            {
+                Energy = EnergyRestore;
+            }
+            discardPile.AddRange(hand);
+            hand.Clear();
+            OnTurnEnd?.Invoke();
+            DrawCardsOnTurnEnd();
+
+            AfterInfoUpdated?.Invoke();
+        }
+
+        private void DrawCardsOnTurnEnd()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                DrawCardOnce();
+            }
+        }
+
+        private void DrawCardOnce()
+        {
+            if (drawPile.Count == 0)
+            {
+                drawPile.AddRange(discardPile);
+                discardPile.Clear();
+            }
+
+            if (drawPile.Count == 0) return;
+
+            int roll = Random.Range(0, drawPile.Count);
+            var cardToDraw = drawPile[roll];
+            hand.Add(cardToDraw);
+            drawPile.RemoveAt(roll);
+        }
     }
 }
